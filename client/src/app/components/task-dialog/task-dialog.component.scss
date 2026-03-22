@@ -1,0 +1,75 @@
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 100%;
+  overflow-x: hidden;
+  width: min(58rem, 100%);
+  padding-top: 0.5rem;
+}
+
+.task-form,
+.comment-form,
+.comments {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dialog-intro {
+  background: linear-gradient(135deg, rgba(63, 63, 81, 0.92), rgba(41, 41, 54, 0.92));
+  border: 1px solid var(--surface-border);
+  border-radius: 22px;
+  padding: 1rem 1.1rem;
+}
+
+.dialog-intro p {
+  color: var(--text-soft);
+  margin: 0;
+}
+
+.task-form__grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.comments__header,
+.comment-card__header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.comments__header h3,
+.comment-card p {
+  margin: 0;
+}
+
+.comments__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 16rem;
+  overflow: auto;
+}
+
+.comment-card {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 18px;
+}
+
+.comment-card p {
+  margin-top: 0.75rem;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 720px) {
+  .dialog-content {
+    width: 100%;
+  }
+
+  .task-form__grid {
+    grid-template-columns: 1fr;
+  }
+}

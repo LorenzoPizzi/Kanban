@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Build outputs
+dist/
+client/dist/
+server/dist/
+.angular/
+
+# Environment files
+.env
+client/.env
+server/.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+client/ng-stdout.log
+client/ng-stderr.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+client/.vscode/
+server/.vscode/
+
+# Local tooling / agents
+.codex/
+AGENTS.md
+agents/
+*.agent.md
+*.agent.json
+
+# Prisma / temp
+prisma/dev.db*
+tmp/
+temp/

@@ -1,0 +1,113 @@
+@import '@angular/material/prebuilt-themes/azure-blue.css';
+
+:root {
+  --bg-top: #4f4f57;
+  --bg-mid: #3b3b45;
+  --bg-bottom: #2a2a31;
+  --surface: rgba(30, 30, 38, 0.78);
+  --surface-strong: rgba(44, 44, 54, 0.96);
+  --surface-border: rgba(255, 255, 255, 0.08);
+  --text-strong: #f8fafc;
+  --text-soft: rgba(226, 232, 240, 0.66);
+  --shadow-lg: 0 24px 70px rgba(0, 0, 0, 0.28);
+  --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.22);
+  --radius-xl: 32px;
+  --radius-lg: 24px;
+  --radius-md: 18px;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(124, 58, 237, 0.12), transparent 24%),
+    radial-gradient(circle at 100% 10%, rgba(99, 102, 241, 0.12), transparent 22%),
+    radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.08), transparent 26%),
+    linear-gradient(
+      180deg,
+      var(--bg-top) 0%,
+      var(--bg-mid) 54%,
+      var(--bg-bottom) 100%
+    );
+  margin: 0;
+  font-family: 'Aptos', 'Segoe UI Variable', 'Segoe UI', sans-serif;
+  color: var(--text-strong);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.mat-mdc-dialog-surface {
+  background: linear-gradient(180deg, rgba(30, 30, 38, 0.98), rgba(24, 24, 31, 0.98)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.4rem !important;
+  color: #f8fafc;
+}
+
+.mat-mdc-dialog-container .mdc-dialog__title,
+.mat-mdc-dialog-container .mdc-dialog__content {
+  color: #f8fafc;
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-form-field .mdc-text-field--outlined,
+.mat-mdc-form-field .mdc-text-field--filled {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-radius: 1rem !important;
+}
+
+.mat-mdc-form-field .mdc-text-field__input,
+.mat-mdc-select-value,
+.mat-mdc-select-arrow,
+.mat-mdc-form-field .mat-mdc-floating-label,
+.mat-mdc-form-field .mat-mdc-input-element,
+.mat-mdc-form-field textarea {
+  color: #f8fafc !important;
+  caret-color: #818cf8 !important;
+}
+
+.mat-mdc-form-field .mat-mdc-input-element::placeholder,
+.mat-mdc-form-field textarea::placeholder {
+  color: rgba(226, 232, 240, 0.45) !important;
+}
+
+.mat-mdc-form-field .mdc-notched-outline__leading,
+.mat-mdc-form-field .mdc-notched-outline__notch,
+.mat-mdc-form-field .mdc-notched-outline__trailing {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: #818cf8 !important;
+}
+
+.mat-mdc-form-field .mat-mdc-form-field-hint,
+.mat-mdc-form-field .mat-mdc-form-field-error,
+.mat-mdc-form-field .mat-mdc-select-placeholder {
+  color: rgba(226, 232, 240, 0.62) !important;
+}
+
+.mat-mdc-select-panel,
+.mat-mdc-autocomplete-panel {
+  background: #242430 !important;
+}
+
+.mat-mdc-option {
+  color: #f8fafc !important;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}

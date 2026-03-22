@@ -1,0 +1,143 @@
+<section class="board-page">
+  <header class="board-header">
+    <div>
+      <p class="board-header__eyebrow">{{ labels.organizerName }}</p>
+      <h1>Un tableau Kanban simple pour organiser vos tâches.</h1>
+      <p class="board-header__copy">
+        Créez une tâche depuis chaque colonne, suivez son avancement et consultez son détail
+        dans la vue rapide.
+      </p>
+    </div>
+    <span class="board-header__summary">{{ boardSummary() }}</span>
+  </header>
+
+  <section *ngIf="isLoading()" class="loading-state">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  </section>
+
+  <section *ngIf="!isLoading()" class="board-layout">
+    <section class="board-scroller">
+      <article
+        *ngFor="let column of columns"
+        class="column"
+        cdkDropList
+        [id]="column.key"
+        [cdkDropListData]="tasksByStatus(column.key)"
+        [cdkDropListConnectedTo]="connectedDropLists"
+        (cdkDropListDropped)="handleDrop($event, column.key)"
+      >
+        <header class="column__header">
+          <div>
+            <h2>{{ column.title }}</h2>
+            <p>{{ column.hint }}</p>
+          </div>
+
+          <div class="column__actions">
+            <span class="column__count">{{ tasksByStatus(column.key).length }}</span>
+            <button
+              class="column__add-button"
+              type="button"
+              [matTooltip]="labels.addTask"
+              (click)="openCreateDialogForStatus(column.key)"
+            >
+              +
+            </button>
+          </div>
+        </header>
+
+        <div class="column__body">
+          <button
+            *ngFor="let task of tasksByStatus(column.key); trackBy: trackTask"
+            class="task-button"
+            type="button"
+            cdkDrag
+            [cdkDragData]="task"
+            (click)="selectTask(task)"
+            (dblclick)="openTaskDialog(task)"
+          >
+            <mat-card
+              class="task-card"
+              appearance="outlined"
+              [class.task-card--selected]="selectedTask()?.id === task.id"
+            >
+              <div class="task-card__accent" [style.background]="getColorStyle(task.color)"></div>
+              <div class="task-card__content">
+                <div class="task-card__meta">
+                  <span
+                    class="task-card__pill"
+                    [style.background]="getColorStyle(task.color)"
+                    [style.color]="getColorTextColor(task.color)"
+                  >
+                    {{ getColorLabel(task.color) }}
+                  </span>
+                  <span>{{ task.comments.length }} commentaire(s)</span>
+                </div>
+                <h3>{{ task.title }}</h3>
+                <p>{{ task.description || 'Aucune description fournie.' }}</p>
+                <div class="task-card__footer">
+                  <span>{{ task.updatedAt | date: 'shortDate' }}</span>
+                  <span>{{ selectedTask()?.id === task.id ? 'Sélectionnée' : 'Détails' }}</span>
+                </div>
+              </div>
+            </mat-card>
+          </button>
+
+          <button
+            class="column__footer"
+            type="button"
+            [matTooltip]="labels.addTask"
+            (click)="openCreateDialogForStatus(column.key)"
+          >
+            + {{ labels.addTask }}
+          </button>
+        </div>
+      </article>
+    </section>
+
+    <aside class="inspector">
+      <div class="inspector__header">
+        <p>{{ labels.detailTitle }}</p>
+        <span>{{ selectedTaskCommentCount() }} commentaire(s)</span>
+      </div>
+
+      <ng-container *ngIf="selectedTask() as task; else noSelectedTask">
+        <section class="inspector__card">
+          <div
+            class="inspector__badge"
+            [style.background]="getColorStyle(task.color)"
+            [style.color]="getColorTextColor(task.color)"
+          >
+            {{ getColorLabel(task.color) }}
+          </div>
+          <h3>{{ task.title }}</h3>
+          <p class="inspector__status">{{ selectedTaskStatus() }}</p>
+          <p class="inspector__description">
+            {{ task.description || 'Aucune description pour cette tâche.' }}
+          </p>
+
+          <div class="inspector__stats">
+            <div>
+              <span>Commentaires</span>
+              <strong>{{ task.comments.length }}</strong>
+            </div>
+            <div>
+              <span>Mise à jour</span>
+              <strong>{{ selectedTaskUpdatedAt() | date: 'short' }}</strong>
+            </div>
+          </div>
+
+          <div class="inspector__actions">
+            <button mat-flat-button type="button" (click)="openTaskDialog(task)">Modifier</button>
+            <button mat-stroked-button type="button" (click)="deleteSelectedTask()">Supprimer</button>
+          </div>
+        </section>
+      </ng-container>
+
+      <ng-template #noSelectedTask>
+        <section class="inspector__card inspector__card--empty">
+          <h3>{{ labels.noTaskSelected }}</h3>
+        </section>
+      </ng-template>
+    </aside>
+  </section>
+</section>
