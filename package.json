@@ -1,0 +1,8 @@
+{
+  "name": "kanban-local-app",
+  "private": true,
+  "scripts": {
+    "app:start": "node scripts/kanban-orchestrator.js start",
+    "app:stop": "node scripts/kanban-orchestrator.js stop"
+  }
+}

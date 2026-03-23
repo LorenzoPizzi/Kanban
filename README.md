@@ -1,139 +1,108 @@
 # Organisateur Personnel
 
-Application Kanban full-stack développée en local avec Angular, Express, Prisma et PostgreSQL.
+Application Kanban full-stack locale avec Angular, Express, Prisma et SQLite.
 
-L'objectif du projet est de proposer un tableau Kanban moderne, lisible et réellement persistant, avec une interface sombre soignée, un drag & drop fluide, des commentaires par tâche et une base PostgreSQL reliée au backend.
+L'application se lance comme une petite app locale Windows:
 
-## Aperçu
+- double-clic sur un raccourci bureau
+- ouverture automatique du navigateur
+- persistance durable des taches
+- bouton `Quitter l'application`
+- arret cible des seuls processus du projet
 
-Fonctionnalités principales :
+## Lancement
 
-- colonnes Kanban avec workflow complet
-- création, modification et suppression de tâches
-- drag & drop entre colonnes avec sauvegarde en base
-- commentaires par tâche
-- couleurs de classification
-- vue rapide pour consulter la tâche sélectionnée
-- persistance PostgreSQL via Prisma
-
-## Stack
-
-- Frontend : Angular standalone
-- UI : Angular Material
-- Drag & Drop : Angular CDK
-- Backend : Node.js + Express
-- ORM : Prisma
-- Base de données : PostgreSQL
-
-## Structure
-
-```text
-Kanban/
-├── client/
-│   ├── src/app/
-│   │   ├── components/
-│   │   ├── constants/
-│   │   ├── models/
-│   │   ├── pages/
-│   │   └── services/
-│   └── package.json
-├── server/
-│   ├── prisma/
-│   ├── src/
-│   │   ├── config/
-│   │   ├── controllers/
-│   │   ├── middlewares/
-│   │   ├── prisma/
-│   │   ├── routes/
-│   │   └── utils/
-│   └── package.json
-└── docker-compose.yml
-```
-
-## Installation
-
-### 1. Base de données
-
-Option recommandée avec Docker :
-
-```bash
-docker compose up -d
-```
-
-Configuration utilisée par défaut :
-
-- base : `kanban_db`
-- utilisateur : `postgres`
-- mot de passe : `postgres`
-- port : `5432`
-
-### 2. Backend
-
-```bash
-cd server
-copy .env.example .env
-npm install
-npm run prisma:generate
-npm run prisma:migrate
-npm run dev
-```
-
-API disponible sur :
-
-```text
-http://127.0.0.1:3000
-```
-
-### 3. Frontend
+Installation unique:
 
 ```bash
 cd client
 npm install
-npm start
+cd ../server
+npm install
 ```
 
-Application disponible sur :
-
-```text
-http://127.0.0.1:4200
-```
-
-## Variables d'environnement
-
-Créer `server/.env` :
-
-```env
-PORT=3000
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/kanban_db?schema=public"
-```
-
-## API REST
-
-- `GET /api/tasks`
-- `GET /api/tasks/:id`
-- `POST /api/tasks`
-- `PATCH /api/tasks/:id`
-- `DELETE /api/tasks/:id`
-- `GET /api/tasks/:id/comments`
-- `POST /api/tasks/:id/comments`
-- `DELETE /api/comments/:id`
-
-## Points clés du projet
-
-- architecture simple et lisible pour un projet portfolio
-- frontend recentré sur une expérience Kanban claire
-- backend REST structuré avec validation et Prisma
-- données persistées après redémarrage de l'application
-- interface en français, pensée pour un usage personnel ou démonstratif
-
-## Lancement rapide
+Lancement quotidien:
 
 ```bash
-docker compose up -d
-cd server && npm install && copy .env.example .env && npm run prisma:migrate && npm run dev
-cd client && npm install && npm start
+start-kanban.cmd
 ```
 
-## Auteur
+Arret manuel:
 
-Projet réalisé pour démontrer une mise en place full-stack propre d'un Kanban moderne avec Angular et PostgreSQL.
+```bash
+stop-kanban.cmd
+```
+
+## Scripts crees
+
+- [start-kanban.cmd](c:/Users/User/Desktop/Kanban/start-kanban.cmd)
+- [stop-kanban.cmd](c:/Users/User/Desktop/Kanban/stop-kanban.cmd)
+- [start-kanban.ps1](c:/Users/User/Desktop/Kanban/scripts/start-kanban.ps1)
+- [stop-kanban.ps1](c:/Users/User/Desktop/Kanban/scripts/stop-kanban.ps1)
+- [kanban-orchestrator.js](c:/Users/User/Desktop/Kanban/scripts/kanban-orchestrator.js)
+- [kanban-frontend-server.js](c:/Users/User/Desktop/Kanban/scripts/kanban-frontend-server.js)
+
+## Fonctionnement
+
+Le lancement:
+
+- prepare la base SQLite locale
+- build le frontend si necessaire
+- lance le backend
+- lance le serveur frontend local
+- attend les endpoints de sante
+- ouvre le navigateur sur `http://127.0.0.1:4318`
+
+Si une instance tourne deja, le lancement n'en cree pas une seconde et rouvre simplement le navigateur.
+
+## Persistance
+
+Les donnees sont stockees dans:
+
+- [kanban-local.db](c:/Users/User/Desktop/Kanban/server/prisma/kanban-local.db)
+
+Les taches, statuts, descriptions, commentaires et dates sont conserves entre les relances.
+
+## Ports
+
+Ports fixes retenus:
+
+- frontend: `4318`
+- backend: `4319`
+- controle orchestrateur: `4320`
+
+Configuration centralisee:
+
+- [kanban.config.js](c:/Users/User/Desktop/Kanban/config/kanban.config.js)
+
+## Quitter l'application
+
+Depuis l'interface:
+
+- bouton `Quitter l'application`
+- confirmation utilisateur
+- message de fermeture
+
+Depuis Windows:
+
+- `stop-kanban.cmd`
+
+L'arret vise uniquement les processus enfants du projet connus par l'orchestrateur.
+
+## Inactivite
+
+Une strategie d'inactivite longue existe mais reste desactivee par defaut.
+
+- seuil d'inactivite: `6h`
+- preavis avant fermeture: `5 min`
+- annulation possible depuis l'interface
+
+Configuration:
+
+- [kanban.config.js](c:/Users/User/Desktop/Kanban/config/kanban.config.js)
+
+## Raccourci bureau
+
+1. Creer un raccourci vers [start-kanban.cmd](c:/Users/User/Desktop/Kanban/start-kanban.cmd)
+2. Placer ce raccourci sur le bureau
+3. Double-cliquer pour lancer l'application

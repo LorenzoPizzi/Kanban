@@ -1,17 +1,33 @@
 import { CommonModule } from '@angular/common';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  inject,
+  signal
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { Observable, interval, merge, of, timer } from 'rxjs';
+import { catchError, switchMap, throttleTime } from 'rxjs/operators';
 
 import { TaskDialogComponent } from '../../components/task-dialog/task-dialog.component';
 import { KANBAN_COLUMNS, LABELS, STATUS_LABELS } from '../../constants/labels';
 import { Task, TaskStatus } from '../../models/task.model';
+import { AppControlService, AppControlStatus } from '../../services/app-control.service';
 import { TaskApiService } from '../../services/task-api.service';
+
+const APP_ACTIVITY = {
+  activityThrottleMs: 30_000,
+  statusPollMs: 30_000
+};
 
 @Component({
   selector: 'app-kanban-board-page',
@@ -31,18 +47,23 @@ import { TaskApiService } from '../../services/task-api.service';
 })
 export class KanbanBoardPageComponent {
   private readonly api = inject(TaskApiService);
+  private readonly appControl = inject(AppControlService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly columns = KANBAN_COLUMNS;
   protected readonly labels = LABELS;
   protected readonly selectedTask = signal<Task | null>(null);
   protected readonly tasks = signal<Task[]>([]);
   protected readonly isLoading = signal(true);
+  protected readonly appStatus = signal<AppControlStatus | null>(null);
+  protected readonly isQuitting = signal(false);
+  protected readonly now = signal(Date.now());
   protected readonly connectedDropLists = this.columns.map((column) => column.key);
   protected readonly boardSummary = computed(() => {
     const total = this.tasks().length;
-    return total === 0 ? LABELS.noTask : `${total} tâche(s) au total`;
+    return total === 0 ? LABELS.noTask : `${total} tache(s) au total`;
   });
   protected readonly selectedTaskStatus = computed(() => {
     const task = this.selectedTask();
@@ -50,9 +71,26 @@ export class KanbanBoardPageComponent {
   });
   protected readonly selectedTaskCommentCount = computed(() => this.selectedTask()?.comments.length ?? 0);
   protected readonly selectedTaskUpdatedAt = computed(() => this.selectedTask()?.updatedAt ?? null);
+  protected readonly inactivityWarningCountdown = computed(() => {
+    const shutdownAt = this.appStatus()?.inactivity.shutdownAt;
+
+    if (!shutdownAt) {
+      return null;
+    }
+
+    const remainingMs = new Date(shutdownAt).getTime() - this.now();
+    const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+    const minutes = Math.floor(remainingSeconds / 60);
+    const seconds = remainingSeconds % 60;
+
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  });
 
   constructor() {
     this.loadTasks();
+    this.refreshAppStatus();
+    this.bindActivityTracking();
+    this.bindStatusPolling();
   }
 
   protected tasksByStatus(status: TaskStatus): Task[] {
@@ -162,10 +200,10 @@ export class KanbanBoardPageComponent {
   protected getColorLabel(color: string): string {
     const labels: Record<string, string> = {
       '#D64545': 'Urgent',
-      '#2F6FED': 'Priorité',
+      '#2F6FED': 'Priorite',
       '#3BA55D': 'Personnel',
       '#D8A100': 'Relecture',
-      '#8A5CF6': 'Idée'
+      '#8A5CF6': 'Idee'
     };
 
     return labels[color] ?? color;
@@ -181,6 +219,37 @@ export class KanbanBoardPageComponent {
     };
 
     return textColors[color] ?? '#ffffff';
+  }
+
+  protected requestApplicationQuit(): void {
+    if (this.isQuitting() || !window.confirm(LABELS.quitAppConfirm)) {
+      return;
+    }
+
+    this.isQuitting.set(true);
+
+    this.appControl.quit().subscribe({
+      next: () => {
+        this.snackBar.open(LABELS.quittingApp, undefined, { duration: 3000 });
+      },
+      error: () => {
+        this.isQuitting.set(false);
+        this.snackBar.open(LABELS.quitAppError, 'Fermer', { duration: 3200 });
+      }
+    });
+  }
+
+  protected cancelIdleWarning(): void {
+    this.appControl.cancelIdleWarning().subscribe({
+      next: () => this.refreshAppStatus(),
+      error: () => {
+        this.snackBar.open(LABELS.quitAppError, 'Fermer', { duration: 3200 });
+      }
+    });
+  }
+
+  protected hasIdleWarning(): boolean {
+    return Boolean(this.appStatus()?.inactivity.warningStartedAt);
   }
 
   private loadTasks(): void {
@@ -202,5 +271,60 @@ export class KanbanBoardPageComponent {
         this.snackBar.open(LABELS.taskLoadError, 'Fermer', { duration: 3000 });
       }
     });
+  }
+
+  private refreshAppStatus(): void {
+    this.appControl
+      .getStatus()
+      .pipe(
+        catchError(() => of(null)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((status) => {
+        this.appStatus.set(status);
+      });
+  }
+
+  private bindActivityTracking(): void {
+    merge(
+      timer(0),
+      interval(APP_ACTIVITY.activityThrottleMs),
+      new Observable<Event>((subscriber) => {
+        const notify = (event: Event) => subscriber.next(event);
+        window.addEventListener('pointerdown', notify);
+        window.addEventListener('keydown', notify);
+        window.addEventListener('focus', notify);
+        document.addEventListener('visibilitychange', notify);
+
+        return () => {
+          window.removeEventListener('pointerdown', notify);
+          window.removeEventListener('keydown', notify);
+          window.removeEventListener('focus', notify);
+          document.removeEventListener('visibilitychange', notify);
+        };
+      })
+    )
+      .pipe(
+        throttleTime(APP_ACTIVITY.activityThrottleMs, undefined, { leading: true, trailing: true }),
+        switchMap(() => {
+          if (document.visibilityState === 'hidden') {
+            return of(null);
+          }
+
+          return this.appControl.recordActivity().pipe(catchError(() => of(null)));
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe();
+  }
+
+  private bindStatusPolling(): void {
+    interval(1000)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.now.set(Date.now()));
+
+    interval(APP_ACTIVITY.statusPollMs)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.refreshAppStatus());
   }
 }

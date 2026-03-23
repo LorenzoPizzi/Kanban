@@ -42,3 +42,5 @@ agents/
 prisma/dev.db*
 tmp/
 temp/
+.runtime/
+server/prisma/kanban-local.db*

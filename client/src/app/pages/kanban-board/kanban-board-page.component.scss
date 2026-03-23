@@ -21,6 +21,17 @@
   padding: 1.5rem;
 }
 
+.board-header__main {
+  min-width: 0;
+}
+
+.board-header__utility {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
 .board-header__eyebrow {
   color: rgba(129, 140, 248, 0.92);
   font-size: 0.74rem;
@@ -28,6 +39,53 @@
   letter-spacing: 0.14em;
   margin: 0 0 0.65rem;
   text-transform: uppercase;
+}
+
+.local-app-card,
+.idle-warning {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.9rem 1rem;
+}
+
+.local-app-card {
+  align-items: center;
+  min-width: min(26rem, 100%);
+}
+
+.local-app-card__eyebrow,
+.idle-warning p {
+  color: rgba(129, 140, 248, 0.92);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  margin: 0 0 0.35rem;
+  text-transform: uppercase;
+}
+
+.local-app-card strong,
+.idle-warning strong {
+  display: block;
+  font-size: 0.88rem;
+}
+
+.local-app-card__quit {
+  white-space: nowrap;
+}
+
+.idle-warning {
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.idle-warning__actions {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
 }
 
 .board-header h1,
@@ -281,8 +339,8 @@
 }
 
 .inspector__card {
-  padding: 1rem;
   min-width: 0;
+  padding: 1rem;
 }
 
 .inspector__badge {
@@ -360,6 +418,18 @@
   }
 
   .board-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .board-header__utility,
+  .local-app-card,
+  .idle-warning {
+    width: 100%;
+  }
+
+  .local-app-card,
+  .idle-warning {
     align-items: flex-start;
     flex-direction: column;
   }

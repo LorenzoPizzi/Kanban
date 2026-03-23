@@ -1,15 +1,48 @@
 <section class="board-page">
   <header class="board-header">
-    <div>
+    <div class="board-header__main">
       <p class="board-header__eyebrow">{{ labels.organizerName }}</p>
-      <h1>Un tableau Kanban simple pour organiser vos tâches.</h1>
+      <h1>Un tableau Kanban simple pour organiser vos taches.</h1>
       <p class="board-header__copy">
-        Créez une tâche depuis chaque colonne, suivez son avancement et consultez son détail
+        Creez une tache depuis chaque colonne, suivez son avancement et consultez son detail
         dans la vue rapide.
       </p>
     </div>
-    <span class="board-header__summary">{{ boardSummary() }}</span>
+
+    <div class="board-header__utility">
+      <span class="board-header__summary">{{ boardSummary() }}</span>
+
+      <section class="local-app-card" *ngIf="appStatus() as status">
+        <div>
+          <p class="local-app-card__eyebrow">{{ labels.localMode }}</p>
+          <strong>{{ labels.lastActivity }} : {{ status.inactivity.lastActivityAt | date: 'short' }}</strong>
+        </div>
+
+        <button
+          mat-stroked-button
+          type="button"
+          class="local-app-card__quit"
+          [disabled]="isQuitting()"
+          (click)="requestApplicationQuit()"
+        >
+          {{ isQuitting() ? labels.quittingApp : labels.quitApp }}
+        </button>
+      </section>
+    </div>
   </header>
+
+  <section *ngIf="hasIdleWarning()" class="idle-warning">
+    <div>
+      <p>{{ labels.idleWarningTitle }}</p>
+      <strong>{{ labels.idleWarningBody }}</strong>
+    </div>
+    <div class="idle-warning__actions">
+      <span *ngIf="inactivityWarningCountdown() as countdown">{{ countdown }}</span>
+      <button mat-flat-button type="button" (click)="cancelIdleWarning()">
+        {{ labels.keepOpen }}
+      </button>
+    </div>
+  </section>
 
   <section *ngIf="isLoading()" class="loading-state">
     <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
@@ -76,7 +109,7 @@
                 <p>{{ task.description || 'Aucune description fournie.' }}</p>
                 <div class="task-card__footer">
                   <span>{{ task.updatedAt | date: 'shortDate' }}</span>
-                  <span>{{ selectedTask()?.id === task.id ? 'Sélectionnée' : 'Détails' }}</span>
+                  <span>{{ selectedTask()?.id === task.id ? 'Selectionnee' : 'Details' }}</span>
                 </div>
               </div>
             </mat-card>
@@ -112,7 +145,7 @@
           <h3>{{ task.title }}</h3>
           <p class="inspector__status">{{ selectedTaskStatus() }}</p>
           <p class="inspector__description">
-            {{ task.description || 'Aucune description pour cette tâche.' }}
+            {{ task.description || 'Aucune description pour cette tache.' }}
           </p>
 
           <div class="inspector__stats">
@@ -121,7 +154,7 @@
               <strong>{{ task.comments.length }}</strong>
             </div>
             <div>
-              <span>Mise à jour</span>
+              <span>Mise a jour</span>
               <strong>{{ selectedTaskUpdatedAt() | date: 'short' }}</strong>
             </div>
           </div>

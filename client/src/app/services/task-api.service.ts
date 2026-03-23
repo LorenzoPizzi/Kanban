@@ -13,7 +13,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class TaskApiService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = `${window.location.protocol}//${window.location.hostname}:3000/api`;
+  private readonly apiUrl = '/api';
 
   getTasks(): Observable<Task[]> {
     return this.http.get<Task[]>(`${this.apiUrl}/tasks`);
